@@ -8,7 +8,7 @@ Multi-layer information fusion based on graph convolutional network for knowledg
 
 torch == 1.5.0+cpu
 
-torch-geometric == 1.6.3
+torch-geometric == 1.4.3 (KDHR and SMGCN) == 1.6.3(other baselines)
 
 numpy == 1.18.1
 
