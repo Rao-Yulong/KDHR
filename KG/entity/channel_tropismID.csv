@@ -1,0 +1,13 @@
+index:ID,channel_tropism,:LABEL
+GJ1,心,channel_tropism
+GJ2,肝,channel_tropism
+GJ3,脾,channel_tropism
+GJ4,肺,channel_tropism
+GJ5,肾,channel_tropism
+GJ6,胃,channel_tropism
+GJ7,大肠,channel_tropism
+GJ8,小肠,channel_tropism
+GJ9,膀胱,channel_tropism
+GJ10,胆,channel_tropism
+GJ11,心包,channel_tropism
+GJ12,三焦,channel_tropism
