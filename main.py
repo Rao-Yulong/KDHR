@@ -306,6 +306,6 @@ print('f1_5-10-20: ',
       2 * (test_p10 / len(x_test)) * (test_r10 / len(x_test)) / ((test_p10 / len(x_test)) + (test_r10 / len(x_test))),
       2 * (test_p20 / len(x_test)) * (test_r20 / len(x_test)) / ((test_p20 / len(x_test)) + (test_r20 / len(x_test))))
 
-
+torch.save(model.state_dict(), '/vc_data/users/t-zilongwang/temp.pt')
 
 
