@@ -21,6 +21,8 @@ from sklearn.metrics import roc_auc_score
 import types
 from torch_sparse import SparseTensor
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 seed = 2021
 np.random.seed(seed)
 if torch.cuda.is_available():
@@ -101,7 +103,7 @@ herbCount = np.array(list(herbCount.values()))
 
 # 读取KG中知识的独热编码
 kg_oneHot = np.load('./data/herb_805_27_oneHot.npy')
-kg_oneHot = torch.from_numpy(kg_oneHot).float()
+kg_oneHot = torch.from_numpy(kg_oneHot).float().to(device)
 
 # 训练集开发集测试集的下标
 p_list = [x for x in range(pLen)]
@@ -122,7 +124,6 @@ dev_loader = torch.utils.data.DataLoader(dev_dataset, batch_size=para.batchSize)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=para.batchSize)
 # print(len(test_loader))
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = KDHR(390, 805, 1195, 64, para.batchSize, para.drop)
 # model = KDHR(390, 805, 1195, 64)
 
@@ -140,13 +141,15 @@ print('device: ', device)
 
 
 epsilon = 1e-13
-
+sh_data = sh_data.to(device)
+ss_data = ss_data.to(device)
+hh_data = hh_data.to(device)
 for epoch in range(para.epoch):
 
     model.train()
     running_loss = 0.0
     for i, (sid, hid) in enumerate(train_loader):
-        # sid, hid = sid.to(device), hid.to(device)
+        sid, hid = sid.to(device), hid.to(device)
         sid, hid = sid.float(), hid.float()
         optimizer.zero_grad()
         # batch*805 概率矩阵
@@ -177,7 +180,7 @@ for epoch in range(para.epoch):
     dev_f1_10 = 0
     dev_f1_20 = 0
     for tsid, thid in dev_loader:
-        tsid, thid = tsid.float(), thid.float()
+        tsid, thid = tsid.float().to(device), thid.float().to(device)
         # batch*805 概率矩阵
         outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,
                         hh_data.x, hh_data.edge_index, tsid, kg_oneHot)
@@ -256,7 +259,7 @@ test_f1_20 = 0
 
 
 for tsid, thid in test_loader:
-    tsid, thid = tsid.float(), thid.float()
+    tsid, thid = tsid.float().to(device), thid.float().to(device)
     # batch*805 概率矩阵
     outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,hh_data.x, hh_data.edge_index, tsid, kg_oneHot)
 
