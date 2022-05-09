@@ -98,7 +98,8 @@ for i in range(pLen):
     k = eval(prescript.iloc[i, 1])
     k = [x - 390 for x in k]
     pH_array[i, k] = 1
-
+pS_array = torch.from_numpy(pS_array).to(device).float()
+pH_array = torch.from_numpy(pH_array).to(device).float()
 # 读取中草药频率
 herbCount = load_obj('./data/herbID2count')
 herbCount = np.array(list(herbCount.values()))
@@ -151,8 +152,6 @@ for epoch in range(para.epoch):
     model.train()
     running_loss = 0.0
     for i, (sid, hid) in enumerate(train_loader):
-        sid, hid = sid.to(device), hid.to(device)
-        sid, hid = sid.float(), hid.float()
         optimizer.zero_grad()
         # batch*805 概率矩阵
         outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,
@@ -182,19 +181,25 @@ for epoch in range(para.epoch):
     dev_f1_10 = 0
     dev_f1_20 = 0
     for tsid, thid in dev_loader:
-        tsid, thid = tsid.float().to(device), thid.float().to(device)
         # batch*805 概率矩阵
+        torch.cuda.synchronize()
+        s = time.time()
         outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,
                         hh_data.x, hh_data.edge_index, tsid, kg_oneHot)
+        torch.cuda.synchronize()
+        e = time.time()
+        print('s',e-s)
         # outputs = model(sh_data.x, sh_data_adj, ss_data.x, ss_data_adj, hh_data.x, hh_data_adj, tsid)
         dev_loss += criterion(outputs, thid).item()
 
+        torch.cuda.synchronize()
+        s = time.time()
         # thid batch*805
         for i, hid in enumerate(thid):
             trueLabel = [] # 对应存在草药的索引
             for idx, val in enumerate(hid):  # 获得thid中值为一的索引
                 if val == 1:
-                    trueLabel.append(idx)
+                    trueLabel.append(idx) 
 
             top5 = torch.topk(outputs[i], 5)[1] # 预测值前5索引
             count = 0
@@ -222,6 +227,9 @@ for epoch in range(para.epoch):
             dev_p20 += count / 20
             dev_r20 += count / len(trueLabel)
             # dev_f1_20 += 2 * (count / 20) * (count / len(trueLabel)) / ((count / 20) + (count / len(trueLabel)) + epsilon)
+        torch.cuda.synchronize()
+        e = time.time()
+        print('v',e-s)
 
     scheduler.step()
 
@@ -261,7 +269,6 @@ test_f1_20 = 0
 
 
 for tsid, thid in test_loader:
-    tsid, thid = tsid.float().to(device), thid.float().to(device)
     # batch*805 概率矩阵
     outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,hh_data.x, hh_data.edge_index, tsid, kg_oneHot)
 
