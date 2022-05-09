@@ -22,6 +22,8 @@ import types
 from torch_sparse import SparseTensor
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if int(os.environ.get('CPU', 0)) == 1:
+    device = torch.device('cpu')
 
 seed = 2021
 np.random.seed(seed)
@@ -42,7 +44,7 @@ class Logger(object):
     def flush(self):
         pass
 
-para = parameter.para(lr=3e-4, rec=7e-3, drop=0.0, batchSize=512, epoch=200, dev_ratio=0.2, test_ratio=0.2)
+para = parameter.para(lr=3e-4, rec=7e-3, drop=0.0, batchSize=int(os.environ.get('BATCH', 512)), epoch=200, dev_ratio=0.2, test_ratio=0.2)
 
 path = os.path.abspath(os.path.dirname(__file__))
 type = sys.getfilesystemencoding()
@@ -124,7 +126,7 @@ dev_loader = torch.utils.data.DataLoader(dev_dataset, batch_size=para.batchSize)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=para.batchSize)
 # print(len(test_loader))
 
-model = KDHR(390, 805, 1195, 64, para.batchSize, para.drop)
+model = KDHR(390, 805, 1195, 64, para.batchSize, para.drop).to(device)
 # model = KDHR(390, 805, 1195, 64)
 
 
