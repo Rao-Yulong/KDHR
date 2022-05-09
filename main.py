@@ -182,18 +182,11 @@ for epoch in range(para.epoch):
     dev_f1_20 = 0
     for tsid, thid in dev_loader:
         # batch*805 概率矩阵
-        torch.cuda.synchronize()
-        s = time.time()
         outputs = model(sh_data.x, sh_data.edge_index, ss_data.x, ss_data.edge_index,
                         hh_data.x, hh_data.edge_index, tsid, kg_oneHot)
-        torch.cuda.synchronize()
-        e = time.time()
-        print('s',e-s)
         # outputs = model(sh_data.x, sh_data_adj, ss_data.x, ss_data_adj, hh_data.x, hh_data_adj, tsid)
         dev_loss += criterion(outputs, thid).item()
 
-        torch.cuda.synchronize()
-        s = time.time()
         # thid batch*805
         for i, hid in enumerate(thid):
             trueLabel = (hid==1).nonzero().flatten()
@@ -223,9 +216,6 @@ for epoch in range(para.epoch):
             dev_p20 += count / 20
             dev_r20 += count / len(trueLabel)
             # dev_f1_20 += 2 * (count / 20) * (count / len(trueLabel)) / ((count / 20) + (count / len(trueLabel)) + epsilon)
-        torch.cuda.synchronize()
-        e = time.time()
-        print('v',e-s)
 
     scheduler.step()
 
