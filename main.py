@@ -236,7 +236,7 @@ for epoch in range(para.epoch):
 
 print(time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
 # 获得 early stopping 时的模型参数
-model.load_state_dict(torch.load('checkpoint.pt'))
+model.load_state_dict(torch.load('/vc_data/users/t-zilongwang/checkpoint.pt'))
 
 model.eval()
 test_loss = 0
