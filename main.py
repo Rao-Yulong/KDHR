@@ -261,10 +261,7 @@ for tsid, thid in test_loader:
     test_loss += criterion(outputs, thid).item()
     # thid batch*805
     for i, hid in enumerate(thid):
-        trueLabel = [] # 对应存在草药的索引
-        for idx, val in enumerate(hid):  # 获得thid中值为一的索引
-            if val == 1:
-                trueLabel.append(idx)
+        trueLabel = (hid==1).nonzero().flatten()
 
         top5 = torch.topk(outputs[i], 5)[1] # 预测值前5索引
         count = 0
